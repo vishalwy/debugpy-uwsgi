@@ -1,0 +1,6 @@
+__pycache__/
+/venv
+/debugpy_uwsgi.egg-info
+/.tox
+/debugpy_uwsgi/config.json
+/dist
