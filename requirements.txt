@@ -1,0 +1,4 @@
+-e .
+build
+pre-commit
+uWSGI
