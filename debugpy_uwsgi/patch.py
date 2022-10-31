@@ -36,6 +36,7 @@ def main():
 
         executable.unlink()
         apply_patch(executable, options)
+        return 0
     except Exception as e:
         print(f"Error applying patch; {e}", file=sys.stderr)
 
