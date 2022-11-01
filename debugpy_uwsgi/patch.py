@@ -23,6 +23,9 @@ def main():
         default=6767,
         help="Port for debugpy to listen to; Default to 6767",
     )
+    parser.add_argument(
+        "--auto-reload", action="store_true", help="Auto reload on file changes"
+    )
     options = parser.parse_args()
 
     try:
@@ -32,7 +35,7 @@ def main():
             return 0
 
         if not backup.exists():
-            raise Exception("already patched, but the backup does not exists")
+            raise Exception("Already patched, but the backup does not exists")
 
         executable.unlink()
         apply_patch(executable, options)

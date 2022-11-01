@@ -8,6 +8,7 @@ class Config:
     callable = None
     debug_port = 0
     python = None
+    auto_reload = False
 
     @classmethod
     def update(cls, data):

@@ -20,21 +20,26 @@ def main():
     parser.add_argument("--processes")
     parser.add_argument("--threads")
     parser.add_argument("--binary-path")
+    parser.add_argument("--py-auto-reload", type=int)
     parser.add_argument("--enable-threads", action="store_true")
     parsed, unparsed = parser.parse_known_args()
 
-    if parsed.wsgi_file:
-        argv.extend(arguments(f"--wsgi-file {Config.get_uwsgi_file_path()}"))
-
-    if not parsed.enable_threads:
-        argv.extend(arguments("--enable-threads"))
-
-    argv.extend(unparsed)
-
     try:
+        Config.load()
+
+        if parsed.wsgi_file:
+            argv.extend(arguments(f"--wsgi-file {Config.get_uwsgi_file_path()}"))
+
+        if Config.auto_reload:
+            argv.extend(arguments("--py-auto-reload 1"))
+
+        if not parsed.enable_threads:
+            argv.extend(arguments("--enable-threads"))
+
+        argv.extend(unparsed)
         os.execve(executable, [executable] + argv, os.environ)
     except Exception as e:
-        print(f"Error invoking {executable}: {e}", file=sys.stderr)
+        print(f"Error spawning {executable}: {e}", file=sys.stderr)
 
     return 1
 
