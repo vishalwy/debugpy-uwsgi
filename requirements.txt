@@ -1,4 +1,24 @@
--e .
-build
-pre-commit
-uWSGI
+#direct deps
+build==0.9.0
+pre-commit==2.20.0
+uWSGI==2.0.21
+
+#indirect deps
+attrs==22.1.0
+cfgv==3.3.1
+distlib==0.3.6
+exceptiongroup==1.0.1
+filelock==3.8.0
+identify==2.5.8
+iniconfig==1.1.1
+nodeenv==1.7.0
+packaging==21.3
+pep517==0.13.0
+platformdirs==2.5.3
+pluggy==1.0.0
+pyparsing==3.0.9
+pytest==7.2.0
+PyYAML==6.0
+toml==0.10.2
+tomli==2.0.1
+virtualenv==20.16.6
