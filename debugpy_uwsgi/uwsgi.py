@@ -7,10 +7,8 @@ from debugpy_uwsgi.config import Config
 
 def main():
     executable = str(Config.get_uwsgi_backup_path())
-    argv = arguments(
-        f"--processes 1 --threads 1 --callable application "
-        f"--binary-path {executable}"
-    )
+    argv = arguments("--processes 1 --threads 1")
+    argv.extend(arguments(f"--binary-path {executable}", 1))
 
     parser = argparse.ArgumentParser(
         description="Patch for uwsgi to modify arguments and enable debugging"
@@ -22,13 +20,15 @@ def main():
     parser.add_argument("--binary-path")
     parser.add_argument("--py-auto-reload", type=int)
     parser.add_argument("--enable-threads", action="store_true")
+    parser.add_argument("--pyargv")
     parsed, unparsed = parser.parse_known_args()
 
     try:
         Config.load()
-
-        if parsed.wsgi_file:
-            argv.extend(arguments(f"--wsgi-file {Config.get_uwsgi_file_path()}"))
+        pyargv = f"--wsgi-entry {parsed.wsgi_file}:{parsed.callable}"
+        argv.extend(arguments(f"--pyargv {parsed.pyargv or ''} {pyargv}", 1))
+        argv.extend(arguments(f"--wsgi-file {Config.get_uwsgi_file_path()}", 1))
+        argv.extend(arguments(f"--callable {Config.get_uwsgi_callable()}", 1))
 
         if Config.auto_reload:
             argv.extend(arguments("--py-auto-reload 1"))
@@ -44,5 +44,5 @@ def main():
     return 1
 
 
-def arguments(cmdline_args):
-    return cmdline_args.split()
+def arguments(cmdline_args, max_split=-1):
+    return cmdline_args.split(maxsplit=max_split)

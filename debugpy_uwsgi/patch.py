@@ -11,17 +11,16 @@ def main():
     parser = argparse.ArgumentParser(
         description="Utility to patch uwsgi to use with debugpy"
     )
-    parser.add_argument("--wsgi-file", required=True, help=".wsgi file to load")
-    parser.add_argument(
-        "--callable",
-        default="application",
-        help="Default WSGI callable name; Default to 'application'",
-    )
     parser.add_argument(
         "--debug-port",
         type=int,
-        default=6767,
+        default=5678,
         help="Port for debugpy to listen to; Default to 6767",
+    )
+    parser.add_argument(
+        "--wait-for-debugger",
+        action="store_true",
+        help="Wait for debugger to connect before proceeding",
     )
     parser.add_argument(
         "--auto-reload", action="store_true", help="Auto reload on file changes"

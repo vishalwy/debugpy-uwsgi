@@ -4,11 +4,10 @@ from pathlib import Path
 
 
 class Config:
-    wsgi_file = None
-    callable = None
     debug_port = 0
     python = None
     auto_reload = False
+    wait_for_debugger = False
 
     @classmethod
     def update(cls, data):
@@ -53,3 +52,7 @@ class Config:
     @classmethod
     def get_uwsgi_file_path(cls):
         return cls.get_package_path() / "wsgi_file.py"
+
+    @classmethod
+    def get_uwsgi_callable(cls):
+        return "application"
