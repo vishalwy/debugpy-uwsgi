@@ -1,16 +1,18 @@
-import argparse
+from __future__ import annotations
+
 import os
 import sys
+from argparse import ArgumentParser
 
 from debugpy_uwsgi.config import Config
 
 
-def main():
+def main() -> int:
     executable = str(Config.get_uwsgi_backup_path())
     argv = arguments("--processes 1 --threads 1")
     argv.extend(arguments(f"--binary-path {executable}", 1))
 
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description="Patch for uwsgi to modify arguments and enable debugging"
     )
     parser.add_argument("--wsgi-file", required=True)
@@ -44,5 +46,5 @@ def main():
     return 1
 
 
-def arguments(cmdline_args, max_split=-1):
+def arguments(cmdline_args: str, max_split: int = -1) -> list[str]:
     return cmdline_args.split(maxsplit=max_split)

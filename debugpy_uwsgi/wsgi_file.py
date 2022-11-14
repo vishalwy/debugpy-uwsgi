@@ -1,9 +1,12 @@
-import argparse
+from __future__ import annotations
+
 import sys
+from argparse import ArgumentParser
 from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec
 from importlib.util import spec_from_loader
 from pathlib import Path
+from typing import Callable
 
 import debugpy
 
@@ -12,13 +15,13 @@ from debugpy_uwsgi.config import Config
 ACTIVATE_PATH = "/debugpy/activate"
 STATUS_PATH = "/debugpy/status"
 
-app = None
+app: Callable | None = None
 debugpy_initialized = False
-wsgi_entry = None
+wsgi_entry: tuple[str, str] | None = None
 
 
-def application(env, start_response):
-    def response(status, body):
+def application(env: dict[str, str], start_response: Callable) -> list[bytes]:
+    def response(status: str, body: str) -> list[bytes]:
         start_response(status, [("Content-Type", "text/html")])
         return [body.encode()]
 
@@ -56,7 +59,7 @@ def application(env, start_response):
     return app(env, start_response)
 
 
-def init_debugpy():
+def init_debugpy() -> None:
     global debugpy_initialized
 
     if debugpy_initialized:
@@ -74,13 +77,13 @@ def init_debugpy():
     debugpy.wait_for_client()
 
 
-def get_wsgi_entry():
+def get_wsgi_entry() -> tuple[str, str]:
     global wsgi_entry
 
     if wsgi_entry:
         return wsgi_entry
 
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument("--wsgi-entry")
     parsed, unparsed = parser.parse_known_args()
     program = sys.argv[0]
@@ -91,12 +94,16 @@ def get_wsgi_entry():
     return wsgi_entry
 
 
-def load_wsgi_file(filename, callable):
+def load_wsgi_file(filename: str, callable: str) -> Callable:
     file_path = Path(filename).resolve()
     sys.path.insert(0, str(file_path.parent))
     spec = spec_from_loader(
         file_path.stem, SourceFileLoader(file_path.stem, str(file_path))
     )
+
+    if not spec or not spec.loader:
+        raise Exception(f"Could not create spec from {file_path}")
+
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
     return getattr(module, callable)

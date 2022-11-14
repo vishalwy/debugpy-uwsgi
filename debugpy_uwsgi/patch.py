@@ -1,16 +1,18 @@
-import argparse
+from __future__ import annotations
+
 import sys
+from argparse import ArgumentParser
+from argparse import Namespace
+from pathlib import Path
 
 from debugpy_uwsgi.config import Config
 
 
-def main():
+def main() -> int:
     executable = Config.get_uwsgi_executable_path()
     backup = Config.get_uwsgi_backup_path()
 
-    parser = argparse.ArgumentParser(
-        description="Utility to patch uwsgi to use with debugpy"
-    )
+    parser = ArgumentParser(description="Utility to patch uwsgi to use with debugpy")
     parser.add_argument(
         "--debug-port",
         type=int,
@@ -45,7 +47,7 @@ def main():
     return 1
 
 
-def apply_patch(executable, options):
+def apply_patch(executable: Path, options: Namespace) -> None:
     Config.update({**vars(options), "python": sys.executable})
     Config.save()
     executable.symlink_to(Config.get_uswgi_patch_path(), False)
