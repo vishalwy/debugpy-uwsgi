@@ -12,7 +12,7 @@ setup(
     python_requires=">=3.7",
     entry_points={
         "console_scripts": [
-            "patch-uwsgi=debugpy_uwsgi.patch:main",
+            "debugpy-uwsgi=debugpy_uwsgi.executable:main",
             "uwsgi.patch=debugpy_uwsgi.uwsgi:main",
         ],
     },

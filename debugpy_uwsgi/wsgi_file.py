@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import sys
+import traceback
 from argparse import ArgumentParser
+from http import HTTPStatus
 from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec
 from importlib.util import spec_from_loader
@@ -21,8 +23,10 @@ wsgi_entry: tuple[str, str] | None = None
 
 
 def application(env: dict[str, str], start_response: Callable) -> list[bytes]:
-    def response(status: str, body: str) -> list[bytes]:
-        start_response(status, [("Content-Type", "text/html")])
+    def response(status: HTTPStatus, body: str) -> list[bytes]:
+        start_response(
+            f"{status.value} {status.phrase}", [("Content-Type", "text/html")]
+        )
         return [body.encode()]
 
     global app
@@ -31,30 +35,31 @@ def application(env: dict[str, str], start_response: Callable) -> list[bytes]:
 
     if request_path == ACTIVATE_PATH:
         if request_method != "POST":
-            return response("405 Method Not Allowed", "Use POST method")
+            return response(HTTPStatus.METHOD_NOT_ALLOWED, "Use POST method")
         elif app:
-            return response("409 Conflict", "Debugpy already activated")
+            return response(HTTPStatus.CONFLICT, "Debugpy already activated")
 
         try:
             init_debugpy()
             app = load_wsgi_file(*get_wsgi_entry())
         except Exception as e:
             print(f"Error activating debugpy; {e}", file=sys.stderr)
-            return response("500 Internal Server Error", "Something went wrong")
+            traceback.print_exc(file=sys.stderr)
+            return response(HTTPStatus.INTERNAL_SERVER_ERROR, "Something went wrong")
 
-        return response("200 OK", "Debugpy activated")
+        return response(HTTPStatus.OK, "Debugpy activated")
     elif request_path == STATUS_PATH:
         if request_method != "GET":
-            return response("405 Method Not Allowed", "Use GET method")
+            return response(HTTPStatus.METHOD_NOT_ALLOWED, "Use GET method")
 
         status = "active" if app else "not active"
-        return response("200 OK", f"Debugpy {status}")
+        return response(HTTPStatus.OK, f"Debugpy {status}")
     elif not app:
         print(
             f"Cannot process this request. First activate debugpy by visiting {ACTIVATE_PATH}",
             file=sys.stderr,
         )
-        return response("400 Bad Request", "Debugpy not activated")
+        return response(HTTPStatus.BAD_REQUEST, "Debugpy not activated")
 
     return app(env, start_response)
 
